@@ -1,8 +1,14 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace stdex;
 
+/// <summary>
+/// A container for an always ordered collection. Any element added using 
+/// the Add() method will be put in their respective ordering amongs the
+/// already present elements, resulting in an always ordered collection.
+/// </summary>
 class OrderedList<T> where T: IComparable<T> {
 	public OrderedList() {}
 	private readonly List<T> _list = [];
@@ -62,5 +68,13 @@ class OrderedList<T> where T: IComparable<T> {
 		}
 		text += "]";
 		return text;
+	}
+}
+
+static class Extensions {
+	extension(string) {
+		public static string operator *(string a, int n) {
+			return string.Concat(Enumerable.Repeat(a, n));
+		}
 	}
 }

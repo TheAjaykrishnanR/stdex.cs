@@ -1,5 +1,6 @@
 *.exe
 *.dll
 *.ps1
+*.csproj
 main.cs
 bin/
