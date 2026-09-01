@@ -128,6 +128,7 @@ static class Extensions {
         public static string operator *(string a, int n) => string.Concat(Enumerable.Repeat(a, n));
     }
     extension(Process p) {
+        /* STATIC */
         /// <summary>
         /// Launch unelevated processes from an elevated process
         /// https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
@@ -177,9 +178,30 @@ static class Extensions {
             return account.Value;
         }
         /// <summary>
+        /// Check if another process is elevated without doing the open handle exception
+        /// bullshit
+        /// </summary>
+        public static bool IsElevated(int pid)
+        {
+            const int PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+            nint handle = Win32.Kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+            const int TOKEN_QUERY = 0x0008;
+            if(Win32.Advapi32.OpenProcessToken(handle, TOKEN_QUERY, out nint tokenHandle) == 0)
+                throw new Exception($"OpenProcessToken failed, win32: {Win32.Last()}");
+            Win32.Advapi32.TOKEN_ELEVATION info = new();
+            if(Win32.Advapi32.GetTokenInformation(tokenHandle, Win32.Advapi32.TOKEN_INFORMATION_CLASS.TokenElevation, ref info, sizeof(uint), out uint returnLength) == 0)
+                throw new Exception($"GetTokenInformation failed, win32: {Win32.Last()}");
+            return info.TokenIsElevated != 0;
+        }
+        /* INSTANCE */
+        /// <summary>
         /// Get process name from process instance
         /// </summary>
         public string GetUserName() => GetUserName((uint)p.Id);
+        /// <summary>
+        /// Check if a process is elevated from its instance
+        /// </summary>
+        public bool IsElevated() => IsElevated(p.Id);
     }
 }
 /* NECESSARY WIN32 DECLARATIONS */
