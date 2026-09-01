@@ -46,7 +46,7 @@ namespace stdex;
 /// the Add() method will be put in their respective ordering amongs the
 /// already present elements, resulting in an always ordered collection.
 /// </summary>
-class OrderedList<T> where T: IComparable<T> {
+class OrderedList<T> where T: IComparable {
     public OrderedList() {}
     private readonly List<T> _list = [];
     public int Count { get { return _list.Count; }}
