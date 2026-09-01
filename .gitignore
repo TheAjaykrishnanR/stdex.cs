@@ -1,6 +1,9 @@
 *.exe
+*.obj
 *.dll
 *.ps1
 *.csproj
-main.cs
+*main.cs
 bin/
+obj/
+docs/*.cs
