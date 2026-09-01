@@ -57,16 +57,17 @@ class OrderedList<T> where T: IComparable {
     /// <returns>The index to which the item was added</returns>
     /// </summary>
     public int Add(T item) {
-        if(Count > 0) {
-            for(int i = 0; i < Count; i++) {
+        int _count = Count;
+        if(_count > 0) {
+            for(int i = 0; i < _count; i++) {
                 if(item.CompareTo(_list[i]) > 0) {
-                    if(i == Count - 1) { _list.Add(item); return i; }
+                    if(i == _count - 1) { _list.Add(item); return i + 1; }
                     if(item.CompareTo(_list[i + 1]) < 0) { _list.Insert(i + 1, item); return i + 1; }
                     // here: item is greater than i'th and (i + 1)'th element
                     // in which case we just continue
                 } else { _list.Insert(i, item); return i; }
             }
-        } _list.Add(item); return Count - 1;
+        } _list.Add(item); return _count;
     }
     public override bool Equals(object? a) {
         if(a is null) return this is null;
