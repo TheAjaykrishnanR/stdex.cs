@@ -55,17 +55,21 @@ class OrderedList<T> where T: IComparable {
         set { _list[i] = value; }
     }
     public bool Contains(T a) => _list.Contains(a);
-    public void Add(T item) {
+    /// <summary>
+    /// Add elements to the list while preserving order
+    /// <returns>The index to which the item was added</returns>
+    /// </summary>
+    public int Add(T item) {
         if(Count > 0) {
             for(int i = 0; i < Count; i++) {
                 if(item.CompareTo(_list[i]) > 0) {
-                    if(i == Count - 1) { _list.Add(item); break; }
-                    if(item.CompareTo(_list[i + 1]) < 0) { _list.Insert(i + 1, item); break; }
+                    if(i == Count - 1) { _list.Add(item); return i; }
+                    if(item.CompareTo(_list[i + 1]) < 0) { _list.Insert(i + 1, item); return i + 1; }
                     // here: item is greater than i'th and (i + 1)'th element
                     // in which case we just continue
-                } else { _list.Insert(i, item); break; }
+                } else { _list.Insert(i, item); return i; }
             }
-        } else _list.Add(item);
+        } _list.Add(item); return Count - 1;
     }
     public override bool Equals(object? a) {
         if(a is null) return this is null;
