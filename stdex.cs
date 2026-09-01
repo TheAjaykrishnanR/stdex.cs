@@ -102,6 +102,7 @@ class OrderedList<T> where T: IComparable {
     }
     public void Remove(T item) => _list.Remove(item);
     public void RemoveAt(int i) => _list.RemoveAt(i);
+    public List<T> ToList() => [.._list];
 }
 
 /* WINDOWS PLATFORM SPECIFIC UTILITIES */
