@@ -107,6 +107,9 @@ class OrderedList<T> where T: IComparable<T> {
 class Clock {
     public class Now {
         private static long freq = 0;
+        /// <summary>
+        /// Get double precision time in seconds with resolution upto the micro
+        /// </summary>
         public static double Time() {
             if (freq == 0)
                 if(Win32.Kernel32.QueryPerformanceFrequency(out freq) == 0)
@@ -115,9 +118,22 @@ class Clock {
                 throw new Exception($"QueryPerformanceCounter failed, win32: {Win32.Last()}");
             return (double)timeStamp / freq;
         }
+        /// <summary>
+        /// Friendlier
+        /// </summary>
         public static long Seconds() => (long)Time();
         public static long Milli() => (long)(Time()*1000);
         public static long Micro() => (long)(Time()*1000000);
+    }
+    /// <summary>
+    /// Measure a function
+    /// </summary>
+    public static T? Measure<T>(Func<T> a, out long dt, Func<long>? clock = null) {
+        clock ??= Now.Milli;
+        long t = clock();
+        T? ret = a();
+        dt = clock() - t;
+        return ret;
     }
 }
 /// <summary>
