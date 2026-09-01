@@ -50,10 +50,7 @@ class OrderedList<T> where T: IComparable {
     public OrderedList() {}
     private readonly List<T> _list = [];
     public int Count { get { return _list.Count; }}
-    public T this[int i] {
-        get { return _list[i]; }
-        set { _list[i] = value; }
-    }
+    public T this[int i] { get { return _list[i]; } }
     public bool Contains(T a) => _list.Contains(a);
     /// <summary>
     /// Add elements to the list while preserving order
@@ -102,6 +99,8 @@ class OrderedList<T> where T: IComparable {
         text += "]";
         return text;
     }
+    public void Remove(T item) => _list.Remove(item);
+    public void RemoveAt(int i) => _list.RemoveAt(i);
 }
 
 /* WINDOWS PLATFORM SPECIFIC UTILITIES */
