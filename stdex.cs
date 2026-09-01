@@ -123,6 +123,26 @@ class OrderedList<T> where T: IComparable<T> {
 }
 
 /// <summary>
+/// High resolution hardware clocks
+/// </summary>
+class Clock {
+	public class Now {
+		private static long freq = 0;
+		public static double Time() {
+			if (freq == 0)
+				if(Win32.Kernel32.QueryPerformanceFrequency(out freq) == 0)
+					throw new Exception($"High resolution performance counter not supported, win32: {Win32.Last()}");
+			if(Win32.Kernel32.QueryPerformanceCounter(out long timeStamp) == 0)
+				throw new Exception($"QueryPerformanceCounter failed, win32: {Win32.Last()}");
+			return (double)timeStamp / freq;
+		}
+		public static long Seconds() => (long)Time();
+		public static long Milli() => (long)(Time()*1000);
+		public static long Micro() => (long)(Time()*1000000);
+	}
+}
+
+/// <summary>
 /// Extensions on built-in types go here
 /// </summary>
 static class Extensions {
@@ -133,28 +153,14 @@ static class Extensions {
 	}
 }
 
-/// <summary>
-/// Hardware clocks
-/// </summary>
-class Clock {
-	public class Now {
-		private static long freq = 0;
-		public static double Time() {
-			if (freq == 0)
-				Kernel32.QueryPerformanceFrequency(out freq);
-			Kernel32.QueryPerformanceCounter(out long timeStamp);
-			return (double)timeStamp / freq;
-		}
-		public static long Seconds() => (long)Time();
-		public static long Milli() => (long)(Time()*1000);
-		public static long Micro() => (long)(Time()*1000000);
+class Win32 {
+	public static int Last() => Marshal.GetLastWin32Error();
+
+	public class Kernel32 {
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern int QueryPerformanceFrequency(out long freq);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern int QueryPerformanceCounter(out long timeStamp);
 	}
-}
-
-class Kernel32 {
-	[DllImport("kernel32.dll")]
-    public static extern int QueryPerformanceFrequency(out long freq);
-
-    [DllImport("kernel32.dll")]
-    public static extern int QueryPerformanceCounter(out long timeStamp);
 }
