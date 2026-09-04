@@ -34,6 +34,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Linq;
+using System.Collections;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Security.Principal;
@@ -41,7 +42,6 @@ using System.Collections.Generic;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
-using System.Collections;
 
 class OrderedList<T>: IEnumerable where T: IComparable {
     /// <summary>
@@ -51,9 +51,13 @@ class OrderedList<T>: IEnumerable where T: IComparable {
     /// </summary>
     public OrderedList() {}
     private readonly List<T> _list = [];
-    public int Count { get { return _list.Count; }}
-    public T this[int i] { get { return _list[i]; } }
+    public int Count => _list.Count;
+    public T this[int i] => _list[i];
+    public List<T> ToList() => [.._list];
     public bool Contains(T a) => _list.Contains(a);
+    public void Remove(T item) => _list.Remove(item);
+    public void RemoveAt(int i) => _list.RemoveAt(i);
+    public IEnumerator GetEnumerator() => _list.GetEnumerator();
     /// <summary>
     /// Add elements to the list while preserving order
     /// <returns>The index to which the item was added</returns>
@@ -88,12 +92,6 @@ class OrderedList<T>: IEnumerable where T: IComparable {
             return hash;
         }
     }
-    public static bool operator ==(OrderedList<T> a, OrderedList<T> b) => a.Equals(b);
-    public static bool operator !=(OrderedList<T> a, OrderedList<T> b) => !a.Equals(b);
-    public static bool operator ==(OrderedList<T> a, object b) => a.Equals(b);
-    public static bool operator !=(OrderedList<T> a, object b) => !a.Equals(b);
-    public static bool operator ==(object a, OrderedList<T> b) => b.Equals(a);
-    public static bool operator !=(object a, OrderedList<T> b) => !b.Equals(a);
     public override string ToString() {
         string text = $"[OrderedList[{typeof(T)}]] {{ items=[";
         for(int i = 0; i < Count; i++) {
@@ -103,10 +101,12 @@ class OrderedList<T>: IEnumerable where T: IComparable {
         text += $"] Count={Count} }}";
         return text;
     }
-    public void Remove(T item) => _list.Remove(item);
-    public void RemoveAt(int i) => _list.RemoveAt(i);
-    public List<T> ToList() => [.._list];
-    public IEnumerator GetEnumerator() => _list.GetEnumerator();
+    public static bool operator ==(OrderedList<T> a, OrderedList<T> b) => a.Equals(b);
+    public static bool operator !=(OrderedList<T> a, OrderedList<T> b) => !a.Equals(b);
+    public static bool operator ==(OrderedList<T> a, object b) => a.Equals(b);
+    public static bool operator !=(OrderedList<T> a, object b) => !a.Equals(b);
+    public static bool operator ==(object a, OrderedList<T> b) => b.Equals(a);
+    public static bool operator !=(object a, OrderedList<T> b) => !b.Equals(a);
 }
 
 /* WINDOWS PLATFORM SPECIFIC UTILITIES */
