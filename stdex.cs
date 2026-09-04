@@ -27,7 +27,11 @@
  * SOFTWARE.
  * */
 
+namespace stdex;
+#nullable enable
+
 using System;
+using System.IO;
 using System.Text;
 using System.Linq;
 using System.Diagnostics;
@@ -39,15 +43,12 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 
-namespace stdex;
-#nullable enable
-
-/// <summary>
-/// A container for an always ordered collection. Any element added using 
-/// the Add() method will be put in their respective ordering amongs the
-/// already present elements, resulting in an always ordered collection.
-/// </summary>
 class OrderedList<T>: IEnumerable where T: IComparable {
+    /// <summary>
+    /// A container for an always ordered collection. Any element added using
+    /// the Add() method will be put in their respective ordering amongst the
+    /// already present elements, resulting in an always ordered collection.
+    /// </summary>
     public OrderedList() {}
     private readonly List<T> _list = [];
     public int Count { get { return _list.Count; }}
@@ -64,8 +65,7 @@ class OrderedList<T>: IEnumerable where T: IComparable {
                 if(item.CompareTo(_list[i]) > 0) {
                     if(i == _count - 1) { _list.Add(item); return i + 1; }
                     if(item.CompareTo(_list[i + 1]) < 0) { _list.Insert(i + 1, item); return i + 1; }
-                    // here: item is greater than i'th and (i + 1)'th element
-                    // in which case we just continue
+                    // here: item is greater than i'th and (i + 1)'th element in which case we just continue
                 } else { _list.Insert(i, item); return i; }
             }
         } _list.Add(item); return _count;
@@ -227,6 +227,35 @@ static class Extensions {
         /// Check if a process is elevated from its instance
         /// </summary>
         public bool IsElevated() => IsElevated(p.Id);
+    }
+    extension(Console) {
+        /// <summary>
+        /// Some extensions for writing colored text output to the console
+        /// </summary>
+        public static string NORMAL => "\x1b[39m";
+        public static string ALT_BUFFER => "\x1b[?1049h";
+        public static string ORIGINAL_BUFFER => "\x1b[?1049l";
+        public static string FOREGROUND(int r, int g, int b) => $"\x1b[38;2;{r};{b};{g}m";
+        public static string BACKGROUND(int r, int g, int b) => $"\x1b[48;2;{r};{b};{g}m";
+        public static string COLOR(object? obj, int r, int b, int g) => $"{FOREGROUND(r, b, g)}{obj}{Console.NORMAL}";
+    }
+}
+public enum LogType { NORMAL, INFO, EVENT, ERROR }
+class Logger {
+    /// <summary>
+    /// A friendly log and extension printer
+    /// </summary>
+    public static void Log(object? obj, LogType type = LogType.NORMAL, Exception? ex = null, string? file = null) {
+        if(ex != null) type = LogType.ERROR;
+        if(file != null) File.AppendAllLines(file, [$"[{type}] {obj}\n{ex?.Message}\n{ex?.StackTrace}"]);
+        string final = type switch {
+            LogType.NORMAL => $"[{Console.COLOR(type, 255, 255, 255)}] {Console.COLOR(obj, 150, 150, 150)}",
+            LogType.ERROR => $"[{Console.COLOR(type, 255, 0, 0)}] {Console.COLOR(obj, 255, 0, 0)}",
+            LogType.EVENT => $"[{Console.COLOR(obj, 20, 10, 150)}] {Console.COLOR(obj, 150, 150, 150)}",
+            _ => $"[{Console.COLOR(type, 255, 255, 255)}] {Console.COLOR(type, 150, 150, 150)}",
+        };
+        if (ex != null) final += $"\n{Console.COLOR(ex.Message, 255, 0, 0)}\n{Console.COLOR(ex.StackTrace, 255, 50, 50)}";
+        Console.WriteLine(final);
     }
 }
 /* NECESSARY WIN32 DECLARATIONS */
