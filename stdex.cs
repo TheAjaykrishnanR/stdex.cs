@@ -37,6 +37,7 @@ using System.Collections.Generic;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
+using System.Collections;
 
 namespace stdex;
 #nullable enable
@@ -46,7 +47,7 @@ namespace stdex;
 /// the Add() method will be put in their respective ordering amongs the
 /// already present elements, resulting in an always ordered collection.
 /// </summary>
-class OrderedList<T> where T: IComparable {
+class OrderedList<T>: IEnumerable where T: IComparable {
     public OrderedList() {}
     private readonly List<T> _list = [];
     public int Count { get { return _list.Count; }}
@@ -71,12 +72,10 @@ class OrderedList<T> where T: IComparable {
     }
     public override bool Equals(object? a) {
         if(a is null) return this is null;
-        if(a is OrderedList<T> _a) {
-            if(base.Equals(_a)) return true;
-            if(_a.Count != Count) return false;
-            for(int i = 0; i < Count; i++) {
-                if(_a[i].CompareTo(this[i]) != 0) return false;
-            }
+        if(base.Equals(a)) return true;
+        if(a is IEnumerable<T> _a) {
+            if(_a.Count() != Count) return false;
+            for(int i = 0; i < Count; i++) if(!_a.ElementAt(i).Equals(this[i])) return false;
             return true;
         }
         return false;
@@ -91,18 +90,23 @@ class OrderedList<T> where T: IComparable {
     }
     public static bool operator ==(OrderedList<T> a, OrderedList<T> b) => a.Equals(b);
     public static bool operator !=(OrderedList<T> a, OrderedList<T> b) => !a.Equals(b);
+    public static bool operator ==(OrderedList<T> a, object b) => a.Equals(b);
+    public static bool operator !=(OrderedList<T> a, object b) => !a.Equals(b);
+    public static bool operator ==(object a, OrderedList<T> b) => b.Equals(a);
+    public static bool operator !=(object a, OrderedList<T> b) => !b.Equals(a);
     public override string ToString() {
-        string text = $"OrderedList<{typeof(T).Name}>({Count})[";
+        string text = $"[OrderedList[{typeof(T)}]] {{ items=[";
         for(int i = 0; i < Count; i++) {
             text += $"{_list[i]}";
             if(i != Count - 1) text += ", ";
         }
-        text += "]";
+        text += $"] Count={Count} }}";
         return text;
     }
     public void Remove(T item) => _list.Remove(item);
     public void RemoveAt(int i) => _list.RemoveAt(i);
     public List<T> ToList() => [.._list];
+    public IEnumerator GetEnumerator() => _list.GetEnumerator();
 }
 
 /* WINDOWS PLATFORM SPECIFIC UTILITIES */
